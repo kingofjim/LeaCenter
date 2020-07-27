@@ -16,7 +16,7 @@ func storeFile(serialNumber string) {
 func readSerial(target string) string {
 	err := godotenv.Load("serialNumber")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading serialNumber file")
 	}
 	serialNumber := os.Getenv(target)
 	if serialNumber != "" {
