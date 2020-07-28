@@ -28,8 +28,8 @@ func readSerial(target string) string {
 	return serialNumber
 }
 
-func GetFile(versionType string, version string) []byte {
-	dir := fmt.Sprintf("data/%v/%v/leadns.tar.gz", versionType, version)
+func GetFile(versionType string, region string, version string) []byte {
+	dir := fmt.Sprintf("data/%v/%v/%v/leadns.tar.gz", versionType, region, version)
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
@@ -40,6 +40,10 @@ func GetFile(versionType string, version string) []byte {
 	dat, err := ioutil.ReadFile(dir)
 	check(err)
 	return dat
+}
+
+func Md5sum(region string, versionType string) string {
+	return "c25b410d083ed531be167107422ce6ec"
 }
 
 func check(e error) {
