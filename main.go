@@ -13,6 +13,7 @@ func main() {
 	err := godotenv.Load()
 	port := os.Getenv("PORT")
 	token := os.Getenv("ACCEPTABLE_TOKEN")
+	originToken := os.Getenv("ORIGIN_TOKEN")
 	tempDir := os.Getenv("TEMP_DIR")
 	dataDir := os.Getenv("DATA_DIR")
 
@@ -42,11 +43,11 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.Use(AuthToken(token))
+	r.Use(AuthToken(token, originToken))
 
 	r.GET("/ping", Pong)
 
-	r.POST("/commit", func(c *gin.Context) {
+	r.POST("/version/commit", func(c *gin.Context) {
 
 	})
 
