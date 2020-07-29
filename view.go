@@ -71,7 +71,7 @@ func Commit(c *gin.Context) {
 	var status int
 	c.BindJSON(&data)
 	fileSizeCheck, err := CheckFileSize(&data)
-	log.Info(data)
+	log.Infoln(data)
 
 	if err != nil {
 		status = 500
@@ -79,7 +79,6 @@ func Commit(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-
 		if fileSizeCheck {
 			go StoreFile(data)
 			status = 200

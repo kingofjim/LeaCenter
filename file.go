@@ -219,6 +219,6 @@ func UpdateSerialFile() {
 
 func check(e error) {
 	if e != nil {
-		log.Panic(e)
+		log.Panicln(e)
 	}
 }
