@@ -142,7 +142,6 @@ func readSerial(target string) string {
 	if serialNumber != "" {
 		log.Info(target + " " + serialNumber)
 	} else {
-		fmt.Println(serialNumber)
 		log.Warning("empty "+target+" value")
 	}
 	return serialNumber
@@ -155,11 +154,9 @@ func GetFile(versionType string, region string, version string) []byte {
 	} else {
 		filename = "leadns.tar.gz"
 	}
-	fmt.Println("filename:" + filename)
 	dir := fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 
 	info, err := os.Stat(dir)
-	fmt.Println(info)
 	if os.IsNotExist(err) {
 		fmt.Println(info)
 		log.Warn(info)
