@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
@@ -79,6 +80,9 @@ func CheckFileSize(data *commitData) (bool, error) {
 			return false, err
 		}
 		data.OldCNProxy = filePath
+	}
+	if data.CNProxy == 0 && data.CNWeb == 0 && data.GlobalDNS == 0 && data.GlobalWeb == 0 && data.GlobalProxy == 0 {
+		return false, errors.New("All parameter is 0")
 	}
 	return true, nil
 }
