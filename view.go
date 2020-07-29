@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -17,7 +18,6 @@ func GetSerial(c *gin.Context) {
 	region := c.Param("region")
 	var version, md5 string
 	if versionType == "web" || versionType == "proxy" || versionType == "dns" {
-
 		if versionType == "web" {
 			if region == "cn" {
 				version = serial_cn_web
@@ -71,6 +71,7 @@ func Commit(c *gin.Context) {
 	var status int
 	c.BindJSON(&data)
 	fileSizeCheck, err := CheckFileSize(&data)
+	log.Info(data)
 
 	if err != nil {
 		status = 500

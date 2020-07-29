@@ -41,9 +41,8 @@ func CheckFileSize(data *commitData) (bool, error) {
 	}
 	if data.GlobalDNS != 0 {
 		fileType := "dns"
-		region := "global"
 		filename := "dns.tar.gz"
-		filePath := tempDir+"/"+fileType+"/"+region+"/"+filename
+		filePath := tempDir+"/"+fileType+"/"+filename
 		fileSize, err := getFileSize(filePath)
 		if err != nil {
 			return false , err
@@ -107,30 +106,31 @@ func StoreFile(data commitData) {
 		os.MkdirAll("data/proxy/global/"+version, os.ModePerm)
 		err := os.Rename(data.OldGlobalProxy, newLocation+"/leadns.tar.gz")
 		check(err)
-		serial_global_web = version
+		serial_global_proxy = version
 	}
 	if data.OldGlobalDNS != "" {
 		newLocation := "data/dns/global/"+version
-		os.MkdirAll("data/dns/global/"+version, os.ModePerm)
+		os.MkdirAll("data/dns/"+version, os.ModePerm)
 		err := os.Rename(data.OldGlobalDNS, newLocation+"/dns.tar.gz")
 		check(err)
-		serial_global_web = version
+		serial_global_dns = version
 	}
 	if data.OldCNWeb != "" {
 		newLocation := "data/web/cn/"+version
 		os.MkdirAll("data/web/cn/"+version, os.ModePerm)
 		err := os.Rename(data.OldCNWeb, newLocation+"/leadns.tar.gz")
 		check(err)
-		serial_global_web = version
+		serial_cn_web = version
 	}
 	if data.OldCNProxy != "" {
 		newLocation := "data/proxy/cn/"+version
 		os.MkdirAll("data/proxy/cn/"+version, os.ModePerm)
 		err := os.Rename(data.OldCNProxy, newLocation+"/leadns.tar.gz")
 		check(err)
-		serial_global_web = version
+		serial_cn_proxy = version
 	}
 	CleanTmp()
+	go UpdateSerialFile()
 }
 
 func readSerial(target string) string {
@@ -148,13 +148,15 @@ func readSerial(target string) string {
 }
 
 func GetFile(versionType string, region string, version string) []byte {
-	var filename string
+	var filename, dir string
 	if versionType == "dns" {
 		filename = "dns.tar.gz"
+		dir = fmt.Sprintf("data/%v/%v/%v", versionType, version, filename)
+
 	} else {
 		filename = "leadns.tar.gz"
+		dir = fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 	}
-	dir := fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
@@ -163,7 +165,9 @@ func GetFile(versionType string, region string, version string) []byte {
 	}
 
 	dat, err := ioutil.ReadFile(dir)
-	check(err)
+	if err != nil {
+		panic(err)
+	}
 	return dat
 }
 
@@ -201,8 +205,20 @@ func CleanTmp() {
 	check(err)
 }
 
+func UpdateSerialFile() {
+	text := fmt.Sprintf("GLOBAL_WEB=%v\n" +
+		"GLOBAL_PROXY=%v\n" +
+		"GLOBAL_DNS=%v\n" +
+		"CN_WEB=%v\n" +
+		"CN_PROXY=%v", serial_global_web, serial_global_proxy, serial_global_dns, serial_cn_web, serial_cn_proxy)
+	env, err := godotenv.Unmarshal(text)
+	check(err)
+	err = godotenv.Write(env, "./serialNumber")
+	check(err)
+}
+
 func check(e error) {
 	if e != nil {
-		log.Warning(e)
+		log.Panic(e)
 	}
 }
