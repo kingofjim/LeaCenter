@@ -48,15 +48,46 @@ func GetSerial(c *gin.Context) {
 	}
 }
 
-func
-Download(c *gin.Context) {
+func Download(c *gin.Context) {
 	versionType := c.Param("type")
 	region := c.Param("region")
 	version := c.Param("version")
 	c.Writer.WriteHeader(http.StatusOK)
-	c.Header("Content-Disposition", "attachment; filename=leadns.tar.gz")
+	c.Header("Content-Disposition", "attachment; filename=dns.tar.gz")
 	c.Header("Content-Type", "application/gzip")
 	//c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
 	c.Writer.Write(GetFile(versionType,region, version))
 	fmt.Println(versionType, version)
+}
+
+func Commit(c *gin.Context) {
+	var data commitData
+	var status int
+	c.BindJSON(&data)
+	fileSizeCheck, err := CheckFileSize(&data)
+
+	if err != nil {
+		fmt.Println("hello", err)
+		status = 500
+		c.JSON(status, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+
+		if fileSizeCheck {
+			go StoreFile(data)
+			status = 200
+		} else {
+			status = 406
+		}
+		c.JSON(status, gin.H{
+			"version":       data.Version,
+			"webGlobal":     data.GlobalWeb,
+			"proxyGlobal":   data.GlobalProxy,
+			"dnsGlobal":     data.GlobalDNS,
+			"webCN":         data.CNWeb,
+			"proxyCN":       data.CNProxy,
+			"fileSizeCheck": fileSizeCheck,
+		})
+	}
 }
