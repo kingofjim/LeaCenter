@@ -67,7 +67,6 @@ func Commit(c *gin.Context) {
 	fileSizeCheck, err := CheckFileSize(&data)
 
 	if err != nil {
-		fmt.Println("hello", err)
 		status = 500
 		c.JSON(status, gin.H{
 			"error": err.Error(),

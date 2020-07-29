@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
@@ -80,7 +79,7 @@ func CheckFileSize(data *commitData) (bool, error) {
 		}
 		data.OldCNProxy = filePath
 	}
-	return true, errors.New("something")
+	return true, nil
 }
 
 func getFileSize(filePath string) (int64, error){
@@ -104,31 +103,32 @@ func StoreFile(data commitData) {
 	if data.OldGlobalProxy != "" {
 		newLocation := "data/proxy/global/"+version
 		os.MkdirAll("data/proxy/global/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalWeb, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.OldGlobalProxy, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_global_web = version
 	}
 	if data.OldGlobalDNS != "" {
 		newLocation := "data/dns/global/"+version
 		os.MkdirAll("data/dns/global/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalWeb, newLocation+"/dns.tar.gz")
+		err := os.Rename(data.OldGlobalDNS, newLocation+"/dns.tar.gz")
 		check(err)
 		serial_global_web = version
 	}
 	if data.OldCNWeb != "" {
 		newLocation := "data/web/cn/"+version
 		os.MkdirAll("data/web/cn/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalWeb, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.OldCNWeb, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_global_web = version
 	}
 	if data.OldCNProxy != "" {
 		newLocation := "data/proxy/cn/"+version
 		os.MkdirAll("data/proxy/cn/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalWeb, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.OldCNProxy, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_global_web = version
 	}
+	CleanTmp()
 }
 
 func readSerial(target string) string {
@@ -147,9 +147,16 @@ func readSerial(target string) string {
 }
 
 func GetFile(versionType string, region string, version string) []byte {
-	dir := fmt.Sprintf("data/%v/%v/%v/dns.tar.gz", versionType, region, version)
+	var filename string
+	if versionType == "dns" {
+		filename = "dns.tar.gz"
+	} else {
+		filename = "leadns.tar.gz"
+	}
+	dir := fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 
 	info, err := os.Stat(dir)
+	fmt.Println(info)
 	if os.IsNotExist(err) {
 		fmt.Println(info)
 		log.Warn(info)
@@ -164,8 +171,17 @@ func Md5sum(region string, versionType string) string {
 	return "8a17a50573453a463ac8971079fafefa"
 }
 
+func CleanTmp() {
+	err := os.RemoveAll(tempDir+"/web")
+	check(err)
+	err = os.RemoveAll(tempDir+"/proxy")
+	check(err)
+	err = os.RemoveAll(tempDir+"/dns")
+	check(err)
+}
+
 func check(e error) {
 	if e != nil {
-		fmt.Println("error:", e)
+		log.Warning(e)
 	}
 }

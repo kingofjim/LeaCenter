@@ -30,6 +30,10 @@ type commitData struct {
 }
 
 func main() {
+	//data := []byte("These pretzels are making me thirsty.")
+	//GetFile("web", "global", "20200728161021")
+	//fmt.Printf("%x", md5.Sum(data))
+	//os.Exit(1)
 	err := godotenv.Load()
 	port := os.Getenv("PORT")
 	token := os.Getenv("ACCEPTABLE_TOKEN")
@@ -64,8 +68,8 @@ func main() {
 
 	r.GET("/ping", Pong)
 	r.POST("/version/commit", Commit)
-	r.GET("/version/:region/:type", GetSerial)
-	r.GET("/version/:region/:type/:version", Download)
+	r.GET("/version/:type/:region", GetSerial)
+	r.GET("/version/:type/:region/:version", Download)
 
 	r.Run(":"+port) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
