@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"io/ioutil"
 	"os"
 )
@@ -153,6 +155,7 @@ func GetFile(versionType string, region string, version string) []byte {
 	} else {
 		filename = "leadns.tar.gz"
 	}
+	fmt.Println("filename:" + filename)
 	dir := fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 
 	info, err := os.Stat(dir)
@@ -168,7 +171,20 @@ func GetFile(versionType string, region string, version string) []byte {
 }
 
 func Md5sum(region string, versionType string) string {
-	return "8a17a50573453a463ac8971079fafefa"
+	f, err := os.Open("data/web/global/20200728161021/leadns.tar.gz")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		log.Fatal(err)
+	}
+
+	md5 := fmt.Sprintf("%x", h.Sum(nil))
+
+	return md5
 }
 
 func CleanTmp() {

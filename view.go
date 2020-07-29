@@ -53,7 +53,13 @@ func Download(c *gin.Context) {
 	region := c.Param("region")
 	version := c.Param("version")
 	c.Writer.WriteHeader(http.StatusOK)
-	c.Header("Content-Disposition", "attachment; filename=dns.tar.gz")
+	var filename string
+	if versionType == "dns" {
+		filename = "dns.tar.gz"
+	} else {
+		filename = "leadns.tar.gz"
+	}
+	c.Header("Content-Disposition", "attachment; filename="+filename)
 	c.Header("Content-Type", "application/gzip")
 	//c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
 	c.Writer.Write(GetFile(versionType,region, version))
