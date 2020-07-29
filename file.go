@@ -136,7 +136,7 @@ func StoreFile(data commitData) {
 func readSerial(target string) string {
 	err := godotenv.Load("serialNumber")
 	if err != nil {
-		log.Fatal("Error loading serialNumber file")
+		log.Warning("Error loading serialNumber file")
 	}
 	serialNumber := os.Getenv(target)
 	if serialNumber != "" {
@@ -181,13 +181,13 @@ func Md5sum(versionType string, region string, version string) string {
 	path := fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 	f, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Warning(err)
 	}
 	defer f.Close()
 
 	h := md5.New()
 	if _, err := io.Copy(h, f); err != nil {
-		log.Fatal(err)
+		log.Warning(err)
 	}
 
 	md5 := fmt.Sprintf("%x", h.Sum(nil))
