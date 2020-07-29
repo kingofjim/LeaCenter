@@ -36,7 +36,7 @@ func GetSerial(c *gin.Context) {
 			}
 		}
 		if version != "" {
-			md5 = Md5sum(region, versionType)
+			md5 = Md5sum(versionType, region, version)
 			if md5 != "" {
 				c.Data(200, "text/plain; charset=utf-8", []byte("version:"+version+"\nmd5sum:"+md5))
 			}
