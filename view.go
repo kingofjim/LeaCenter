@@ -70,6 +70,9 @@ func Commit(c *gin.Context) {
 	var data commitData
 	var status int
 	c.BindJSON(&data)
+	fmt.Println(c.Request)
+	fmt.Println(c.Request.Body)
+	fmt.Println(c.Request.Header)
 	fileSizeCheck, err := CheckFileSize(&data)
 	log.Infoln(data)
 

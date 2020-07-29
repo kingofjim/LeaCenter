@@ -160,7 +160,6 @@ func GetFile(versionType string, region string, version string) []byte {
 
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		fmt.Println(info)
 		log.Warn(info)
 	}
 
