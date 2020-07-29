@@ -109,7 +109,7 @@ func StoreFile(data commitData) {
 		serial_global_proxy = version
 	}
 	if data.OldGlobalDNS != "" {
-		newLocation := "data/dns/global/"+version
+		newLocation := "data/dns/"+version
 		os.MkdirAll("data/dns/"+version, os.ModePerm)
 		err := os.Rename(data.OldGlobalDNS, newLocation+"/dns.tar.gz")
 		check(err)
