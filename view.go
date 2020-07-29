@@ -73,8 +73,8 @@ func Commit(c *gin.Context) {
 	fmt.Println("Request:", c.Request)
 	fmt.Println("Header:", c.Request.Header)
 	fmt.Println("Body", c.Request.Body)
-	fileSizeCheck, err := CheckFileSize(&data)
 	log.Infoln(data)
+	fileSizeCheck, err := CheckFileSize(&data)
 
 	if err != nil {
 		status = 500
