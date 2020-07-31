@@ -175,14 +175,16 @@ func GetFile(versionType string, region string, version string) []byte {
 }
 
 func Md5sum(versionType string, region string, version string) string {
-	var filename string
+	var filename, path string
 	if versionType == "dns" {
 		filename = "dns.tar.gz"
+		path = fmt.Sprintf("data/%v/%v/%v", versionType, version, filename)
 	} else {
 		filename = "leadns.tar.gz"
+		path = fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
+
 	}
 
-	path := fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
 	f, err := os.Open(path)
 	if err != nil {
 		log.Warning(err)

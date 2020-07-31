@@ -62,40 +62,45 @@ func Download(c *gin.Context) {
 	c.Header("Content-Disposition", "attachment; filename="+filename)
 	c.Header("Content-Type", "application/gzip")
 	//c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
-	c.Writer.Write(GetFile(versionType,region, version))
+	c.Writer.Write(GetFile(versionType, region, version))
 	fmt.Println(versionType, version)
 }
 
 func Commit(c *gin.Context) {
-	var data commitData
-	var status int
-	c.BindJSON(&data)
-	fmt.Println("Request:", c.Request)
-	fmt.Println("Header:", c.Request.Header)
-	fmt.Println("Body", c.Request.Body)
-	log.Infoln(data)
-	fileSizeCheck, err := CheckFileSize(&data)
+	if isOrigin == true {
+		var data commitData
+		var status int
+		c.BindJSON(&data)
+		fmt.Println("Request:", c.Request)
+		fmt.Println("Header:", c.Request.Header)
+		fmt.Println("Body", c.Request.Body)
+		log.Infoln(data)
+		fileSizeCheck, err := CheckFileSize(&data)
 
-	if err != nil {
-		status = 500
-		c.JSON(status, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		if fileSizeCheck {
-			go StoreFile(data)
-			status = 200
+		if err != nil {
+			status = 500
+			c.JSON(status, gin.H{
+				"error": err.Error(),
+			})
 		} else {
-			status = 406
+			if fileSizeCheck {
+				go StoreFile(data)
+				status = 200
+			} else {
+				status = 406
+			}
+			c.JSON(status, gin.H{
+				"version":       data.Version,
+				"webGlobal":     data.GlobalWeb,
+				"proxyGlobal":   data.GlobalProxy,
+				"dnsGlobal":     data.GlobalDNS,
+				"webCN":         data.CNWeb,
+				"proxyCN":       data.CNProxy,
+				"fileSizeCheck": fileSizeCheck,
+			})
 		}
-		c.JSON(status, gin.H{
-			"version":       data.Version,
-			"webGlobal":     data.GlobalWeb,
-			"proxyGlobal":   data.GlobalProxy,
-			"dnsGlobal":     data.GlobalDNS,
-			"webCN":         data.CNWeb,
-			"proxyCN":       data.CNProxy,
-			"fileSizeCheck": fileSizeCheck,
-		})
+	} else {
+		c.AbortWithStatus(401)
 	}
+
 }
