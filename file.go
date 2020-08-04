@@ -182,7 +182,6 @@ func Md5sum(versionType string, region string, version string) string {
 	} else {
 		filename = "leadns.tar.gz"
 		path = fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
-
 	}
 
 	f, err := os.Open(path)

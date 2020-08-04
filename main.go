@@ -1,10 +1,12 @@
 package main
 
 import (
+	"LeaCenter/cleaner"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"time"
 )
 
 var serial_cn_web, serial_global_web, md5_cn_web, md5_global_web,
@@ -43,6 +45,8 @@ func main() {
 	serial_global_proxy = readSerial("CN_PROXY")
 	serial_global_dns = readSerial("GLOBAL_DNS")
 
+	cleaner_interval := readSerial("CLEANER_INTERVAL")
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -58,7 +62,6 @@ func main() {
 	} else if originToken == "" {
 		log.Fatal("ORIGIN_TOKEN is empty in .env file")
 	}
-
 	r := gin.Default()
 	r.Use(AuthToken(token, originToken))
 
@@ -66,6 +69,12 @@ func main() {
 	r.POST("/version/commit", Commit)
 	r.GET("/version/:type/:region", GetSerial)
 	r.GET("/version/:type/:region/:version", Download)
+
+	//go cleaner.StartCleaner(24*time.Hour)
+	if cleaner_interval != "" {
+		cleaner_interval, _ := time.ParseDuration(cleaner_interval)
+		go cleaner.StartCleaner(cleaner_interval)
+	}
 
 	r.Run(":"+port) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
