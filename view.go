@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -63,7 +62,7 @@ func Download(c *gin.Context) {
 	c.Header("Content-Type", "application/gzip")
 	//c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
 	c.Writer.Write(GetFile(versionType, region, version))
-	fmt.Println(versionType, version)
+	//fmt.Println(versionType, version)
 }
 
 func Commit(c *gin.Context) {
@@ -71,9 +70,9 @@ func Commit(c *gin.Context) {
 		var data commitData
 		var status int
 		c.BindJSON(&data)
-		fmt.Println("Request:", c.Request)
-		fmt.Println("Header:", c.Request.Header)
-		fmt.Println("Body", c.Request.Body)
+		//fmt.Println("Request:", c.Request)
+		//fmt.Println("Header:", c.Request.Header)
+		//fmt.Println("Body", c.Request.Body)
 		log.Infoln(data)
 		fileSizeCheck, err := CheckFileSize(&data)
 
