@@ -1,7 +1,8 @@
 .idea
 .env
-data/
+bin/centos/data/
 tmp/
 serialNumber
 LeaCenter
 tmp_backup/
+data
