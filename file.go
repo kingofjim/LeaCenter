@@ -2,8 +2,8 @@ package main
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -11,127 +11,112 @@ import (
 	"os"
 )
 
-func CheckFileSize(data *commitData) (bool, error) {
-	if data.GlobalWeb != 0 {
+func CheckFileExist(data *commitData) (bool, error) {
+	if data.WebVersion != "0" {
 		fileType := "web"
 		region := "global"
 		filename := "leadns.tar.gz"
 		filePath := tempDir+"/"+fileType+"/"+region+"/"+filename
-		fileSize, err := getFileSize(filePath)
-		if err != nil {
-			return false , err
-		}
-		if data.GlobalWeb != fileSize {
+		if _, err := os.Stat(filePath); err == nil {
+			data.TmpPathGlobalWeb = filePath
+		} else {
 			return false, err
 		}
-		data.OldGlobalWeb = filePath
+
+		region = "cn"
+		filename = "leadns.tar.gz"
+		filePath = tempDir+"/"+fileType+"/"+region+"/"+filename
+		if _, err := os.Stat(filePath); err == nil {
+			data.TmpPathCNWeb = filePath
+		} else {
+			return false, err
+		}
 	}
-	if data.GlobalProxy != 0 {
+	if data.ProxyVersion != "0" {
 		fileType := "proxy"
 		region := "global"
 		filename := "leadns.tar.gz"
 		filePath := tempDir+"/"+fileType+"/"+region+"/"+filename
-		fileSize, err := getFileSize(filePath)
-		if err != nil {
-			return false , err
-		}
-		if data.GlobalProxy != fileSize {
+		if _, err := os.Stat(filePath); err == nil {
+			data.TmpPathGlobalProxy = filePath
+		} else {
 			return false, err
 		}
-		data.OldGlobalProxy = filePath
+		region = "cn"
+		filename = "leadns.tar.gz"
+		filePath = tempDir+"/"+fileType+"/"+region+"/"+filename
+		if _, err := os.Stat(filePath); err == nil {
+			data.TmpPathCNProxy = filePath
+		} else {
+			return false, err
+		}
 	}
-	if data.GlobalDNS != 0 {
+	if data.DnsVersion != "0" {
 		fileType := "dns"
 		filename := "dns.tar.gz"
 		filePath := tempDir+"/"+fileType+"/"+filename
-		fileSize, err := getFileSize(filePath)
-		if err != nil {
-			return false , err
-		}
-		if data.GlobalDNS != fileSize {
+		if _, err := os.Stat(filePath); err == nil {
+			data.TmpPathGlobalDNS = filePath
+		} else {
 			return false, err
 		}
-		data.OldGlobalDNS = filePath
 	}
-	if data.CNWeb != 0 {
-		fileType := "web"
-		region := "cn"
-		filename := "leadns.tar.gz"
-		filePath := tempDir+"/"+fileType+"/"+region+"/"+filename
-		fileSize, err := getFileSize(filePath)
-		if err != nil {
-			return false , err
-		}
-		if data.CNWeb != fileSize {
+
+	if data.Version != "0" {
+		filename := "compressfile.tar.gz"
+		filePath := tempDir+"/"+filename
+		if _, err := os.Stat(filePath); err == nil {
+			data.TmpPathGlobalAll = filePath
+		} else {
 			return false, err
 		}
-		data.OldCNWeb = filePath
-	}
-	if data.CNProxy != 0 {
-		fileType := "proxy"
-		region := "cn"
-		filename := "leadns.tar.gz"
-		filePath := tempDir+"/"+fileType+"/"+region+"/"+filename
-		fileSize, err := getFileSize(filePath)
-		if err != nil {
-			return false , err
-		}
-		if data.CNProxy != fileSize {
-			return false, err
-		}
-		data.OldCNProxy = filePath
-	}
-	if data.CNProxy == 0 && data.CNWeb == 0 && data.GlobalDNS == 0 && data.GlobalWeb == 0 && data.GlobalProxy == 0 {
-		return false, errors.New("All parameter is 0")
 	}
 	return true, nil
 }
 
-func getFileSize(filePath string) (int64, error){
-	fi, err := os.Stat(filePath)
-	check(err)
-	if err != nil {
-		return 0 , err
-	}
-	return fi.Size(), err
-}
-
 func StoreFile(data commitData) {
 	version := data.Version
-	if data.OldGlobalWeb != "" {
+	if data.WebVersion != "0" && data.TmpPathGlobalWeb != "" {
 		newLocation := "data/web/global/"+version
 		os.MkdirAll("data/web/global/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalWeb, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.TmpPathGlobalWeb, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_global_web = version
 	}
-	if data.OldGlobalProxy != "" {
+	if data.ProxyVersion != "0" && data.TmpPathGlobalProxy != "" {
 		newLocation := "data/proxy/global/"+version
 		os.MkdirAll("data/proxy/global/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalProxy, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.TmpPathGlobalProxy, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_global_proxy = version
 	}
-	if data.OldGlobalDNS != "" {
+	if data.DnsVersion != "0" && data.TmpPathGlobalDNS != "" {
 		newLocation := "data/dns/"+version
 		os.MkdirAll("data/dns/"+version, os.ModePerm)
-		err := os.Rename(data.OldGlobalDNS, newLocation+"/dns.tar.gz")
+		err := os.Rename(data.TmpPathGlobalDNS, newLocation+"/dns.tar.gz")
 		check(err)
 		serial_global_dns = version
 	}
-	if data.OldCNWeb != "" {
+	if data.WebVersion != "0" && data.TmpPathCNWeb != "" {
 		newLocation := "data/web/cn/"+version
 		os.MkdirAll("data/web/cn/"+version, os.ModePerm)
-		err := os.Rename(data.OldCNWeb, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.TmpPathCNWeb, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_cn_web = version
 	}
-	if data.OldCNProxy != "" {
+	if data.ProxyVersion != "0" && data.TmpPathCNProxy != "" {
 		newLocation := "data/proxy/cn/"+version
 		os.MkdirAll("data/proxy/cn/"+version, os.ModePerm)
-		err := os.Rename(data.OldCNProxy, newLocation+"/leadns.tar.gz")
+		err := os.Rename(data.TmpPathCNProxy, newLocation+"/leadns.tar.gz")
 		check(err)
 		serial_cn_proxy = version
+	}
+	if data.TmpPathGlobalAll != "" {
+		newLocation := "data/all/global/"+version
+		os.MkdirAll("data/all/global/"+version, os.ModePerm)
+		err := os.Rename(data.TmpPathGlobalAll, newLocation+"/compressfile.tar.gz")
+		check(err)
+		serial_global_all = version
 	}
 	CleanTmp()
 	go UpdateSerialFile()
@@ -153,7 +138,10 @@ func readSerial(target string) string {
 
 func GetFile(versionType string, region string, version string) []byte {
 	var filename, dir string
-	if versionType == "dns" {
+	if versionType == "all" {
+		filename = "compressfile.tar.gz"
+		dir = fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
+	} else if versionType == "dns" {
 		filename = "dns.tar.gz"
 		dir = fmt.Sprintf("data/%v/%v/%v", versionType, version, filename)
 
@@ -176,7 +164,10 @@ func GetFile(versionType string, region string, version string) []byte {
 
 func Md5sum(versionType string, region string, version string) string {
 	var filename, path string
-	if versionType == "dns" {
+	if versionType == "all" {
+		filename = "compressfile.tar.gz"
+		path = fmt.Sprintf("data/%v/%v/%v/%v", versionType, region, version, filename)
+	} else if versionType == "dns" {
 		filename = "dns.tar.gz"
 		path = fmt.Sprintf("data/%v/%v/%v", versionType, version, filename)
 	} else {
@@ -207,6 +198,8 @@ func CleanTmp() {
 	check(err)
 	err = os.RemoveAll(tempDir+"/dns")
 	check(err)
+	err = os.RemoveAll(tempDir+"/compressfile.tar.gz")
+	check(err)
 }
 
 func UpdateSerialFile() {
@@ -214,7 +207,8 @@ func UpdateSerialFile() {
 		"GLOBAL_PROXY=%v\n" +
 		"GLOBAL_DNS=%v\n" +
 		"CN_WEB=%v\n" +
-		"CN_PROXY=%v", serial_global_web, serial_global_proxy, serial_global_dns, serial_cn_web, serial_cn_proxy)
+		"CN_PROXY=%v\n" +
+		"GLOBAL_ALL=%v", serial_global_web, serial_global_proxy, serial_global_dns, serial_cn_web, serial_cn_proxy, serial_global_all)
 	env, err := godotenv.Unmarshal(text)
 	check(err)
 	err = godotenv.Write(env, "./serialNumber")
@@ -225,4 +219,17 @@ func check(e error) {
 	if e != nil {
 		log.Panicln(e)
 	}
+}
+
+func check_error_500(c *gin.Context, e error) bool{
+	if e != nil {
+		log.Panicln(e)
+		status := 500
+		fmt.Println(e)
+		c.JSON(status, gin.H{
+			"error": e.Error(),
+		})
+		return true
+	}
+	return false
 }

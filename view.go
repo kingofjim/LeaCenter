@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os/exec"
 )
 
 func Pong(c *gin.Context) {
@@ -16,8 +18,10 @@ func GetSerial(c *gin.Context) {
 	versionType := c.Param("type")
 	region := c.Param("region")
 	var version, md5 string
-	if versionType == "web" || versionType == "proxy" || versionType == "dns" {
-		if versionType == "web" {
+	if versionType == "web" || versionType == "proxy" || versionType == "dns" || versionType == "all" {
+		if versionType == "all" && region == "global"{
+			version = serial_global_all
+		} else if versionType == "web" {
 			if region == "cn" {
 				version = serial_cn_web
 			} else if region == "global" {
@@ -37,7 +41,11 @@ func GetSerial(c *gin.Context) {
 		if version != "" {
 			md5 = Md5sum(versionType, region, version)
 			if md5 != "" {
-				c.Data(200, "text/plain; charset=utf-8", []byte("version:"+version+"\nmd5sum:"+md5))
+				if versionType == "all" {
+					c.Data(200, "text/plain; charset=utf-8", []byte("version:"+serial_global_all+"\nmd5sum:"+md5+"\ndnsVersion:"+serial_global_dns+"\nwebVersion:"+serial_global_web+"\nproxyVersion:"+serial_global_proxy))
+				} else {
+					c.Data(200, "text/plain; charset=utf-8", []byte("version:"+version+"\nmd5sum:"+md5))
+				}
 			}
 		} else {
 			c.AbortWithStatus(500)
@@ -47,13 +55,19 @@ func GetSerial(c *gin.Context) {
 	}
 }
 
+func GetAllSerial(c *gin.Context) {
+	fmt.Println("haha")
+}
+
 func Download(c *gin.Context) {
 	versionType := c.Param("type")
 	region := c.Param("region")
 	version := c.Param("version")
 	c.Writer.WriteHeader(http.StatusOK)
 	var filename string
-	if versionType == "dns" {
+	if versionType == "all" {
+		filename = "compressfile.tar.gz"
+	} else if versionType == "dns" {
 		filename = "dns.tar.gz"
 	} else {
 		filename = "leadns.tar.gz"
@@ -74,7 +88,19 @@ func Commit(c *gin.Context) {
 		//fmt.Println("Header:", c.Request.Header)
 		//fmt.Println("Body", c.Request.Body)
 		log.Infoln(data)
-		fileSizeCheck, err := CheckFileSize(&data)
+		cmd := exec.Command("tar", "zxf", "tmp/compressfile.tar.gz", "-C", "tmp")
+		err := cmd.Run()
+
+		if err != nil {
+			status = 500
+			c.JSON(status, gin.H{
+				"error": err.Error(),
+				"message": "untar failed.",
+			})
+			return
+		}
+
+		fileCheck, err := CheckFileExist(&data)
 
 		if err != nil {
 			status = 500
@@ -82,7 +108,7 @@ func Commit(c *gin.Context) {
 				"error": err.Error(),
 			})
 		} else {
-			if fileSizeCheck {
+			if fileCheck {
 				go StoreFile(data)
 				status = 200
 			} else {
@@ -90,12 +116,6 @@ func Commit(c *gin.Context) {
 			}
 			c.JSON(status, gin.H{
 				"version":       data.Version,
-				"webGlobal":     data.GlobalWeb,
-				"proxyGlobal":   data.GlobalProxy,
-				"dnsGlobal":     data.GlobalDNS,
-				"webCN":         data.CNWeb,
-				"proxyCN":       data.CNProxy,
-				"fileSizeCheck": fileSizeCheck,
 			})
 		}
 	} else {

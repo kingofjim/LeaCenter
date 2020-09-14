@@ -11,7 +11,7 @@ import (
 
 var serial_cn_web, serial_global_web, md5_cn_web, md5_global_web,
 	serial_cn_proxy, serial_global_proxy, md5_cn_proxy, md5_global_proxy,
-	serial_global_dns, md5_global_dns string
+	serial_global_dns, md5_global_dns, serial_global_all, md5_global_all string
 
 var isOrigin bool
 
@@ -19,16 +19,15 @@ var tempDir, dataDir string
 
 type commitData struct {
 	Version string `json:"version"`
-	GlobalWeb int64 `json:"webGlobal"`
-	GlobalProxy int64 `json:"ProxyGlobal"`
-	GlobalDNS int64 `json:"dnsGlobal"`
-	CNWeb int64 `json:"webCN"`
-	CNProxy int64 `json:"proxyCN"`
-	OldGlobalWeb string
-	OldGlobalProxy string
-	OldGlobalDNS string
-	OldCNWeb string
-	OldCNProxy string
+	WebVersion string `json:"webVersion"`
+	ProxyVersion string `json:"proxyVersion"`
+	DnsVersion string `json:"dnsVersion"`
+	TmpPathGlobalWeb string
+	TmpPathGlobalProxy string
+	TmpPathGlobalDNS string
+	TmpPathGlobalAll string
+	TmpPathCNWeb string
+	TmpPathCNProxy string
 }
 
 func main() {
@@ -44,6 +43,7 @@ func main() {
 	serial_cn_proxy = readSerial("GLOBAL_PROXY")
 	serial_global_proxy = readSerial("CN_PROXY")
 	serial_global_dns = readSerial("GLOBAL_DNS")
+	serial_global_all = readSerial("GLOBAL_ALL")
 
 	cleaner_interval := readSerial("CLEANER_INTERVAL")
 
