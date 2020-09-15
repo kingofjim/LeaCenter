@@ -19,7 +19,7 @@ func GetSerial(c *gin.Context) {
 	region := c.Param("region")
 	var version, md5 string
 	if versionType == "web" || versionType == "proxy" || versionType == "dns" || versionType == "all" {
-		if versionType == "all" && region == "global"{
+		if versionType == "all" && region == "global" {
 			version = serial_global_all
 		} else if versionType == "web" {
 			if region == "cn" {
@@ -88,13 +88,22 @@ func Commit(c *gin.Context) {
 		//fmt.Println("Header:", c.Request.Header)
 		//fmt.Println("Body", c.Request.Body)
 		log.Infoln(data)
+		if data.Version == "" || data.DnsVersion == "" || data.WebVersion == "" || data.ProxyVersion == "" {
+			status = 500
+			c.JSON(status, gin.H{
+				"error":   "value_error",
+				"message": "Broken input",
+			})
+			return
+		}
+
 		cmd := exec.Command("tar", "zxf", "tmp/compressfile.tar.gz", "-C", "tmp")
 		err := cmd.Run()
 
 		if err != nil {
 			status = 500
 			c.JSON(status, gin.H{
-				"error": err.Error(),
+				"error":   err.Error(),
 				"message": "untar failed.",
 			})
 			return
@@ -115,11 +124,10 @@ func Commit(c *gin.Context) {
 				status = 406
 			}
 			c.JSON(status, gin.H{
-				"version":       data.Version,
+				"version": data.Version,
 			})
 		}
 	} else {
 		c.AbortWithStatus(401)
 	}
-
 }

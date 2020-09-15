@@ -15,7 +15,7 @@ func StartCleaner(duration time.Duration) {
 }
 
 func cleanExpireData() {
-	dataType := []string{"dns", "proxy/global", "proxy/cn", "web/global", "web/cn"}
+	dataType := []string{"dns", "proxy/global", "proxy/cn", "web/global", "web/cn", "all/global"}
 	fmt.Println(fmt.Sprintf("%v - Clean job start", time.Now().Format("2006-01-02- 15:04:05")))
 	for _, dt := range dataType {
 		folders, err := ioutil.ReadDir(fmt.Sprintf("data/%v", dt))
