@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"os"
 	"strings"
@@ -23,6 +24,7 @@ func CheckIP(clientIP string) bool {
 	if clientIP == "::1" {
 		clientIP = "127.0.0.1"
 	}
+	fmt.Println("IP: ", clientIP)
 	originIP := os.Getenv("ORIGIN_IP")
 	ipList := strings.Split(originIP, ",")
 	for _, ip := range ipList {
