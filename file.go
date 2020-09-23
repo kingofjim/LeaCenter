@@ -75,43 +75,59 @@ func CheckFileExist(data *commitData) (bool, error) {
 }
 
 func StoreFile(data commitData) {
-	version := data.Version
+	var version string
 	if data.WebVersion != "0" && data.TmpPathGlobalWeb != "" {
-		newLocation := "data/web/global/"+version
-		os.MkdirAll("data/web/global/"+version, os.ModePerm)
-		err := os.Rename(data.TmpPathGlobalWeb, newLocation+"/leadns.tar.gz")
-		check(err)
-		serial_global_web = version
+		version = data.WebVersion
+		if serial_global_web != version {
+			newLocation := "data/web/global/" + version
+			os.MkdirAll("data/web/global/"+version, os.ModePerm)
+			err := os.Rename(data.TmpPathGlobalWeb, newLocation+"/leadns.tar.gz")
+			check(err)
+			serial_global_web = version
+		}
 	}
 	if data.ProxyVersion != "0" && data.TmpPathGlobalProxy != "" {
-		newLocation := "data/proxy/global/"+version
-		os.MkdirAll("data/proxy/global/"+version, os.ModePerm)
-		err := os.Rename(data.TmpPathGlobalProxy, newLocation+"/leadns.tar.gz")
-		check(err)
-		serial_global_proxy = version
+		version = data.ProxyVersion
+		if serial_global_proxy != version {
+			newLocation := "data/proxy/global/" + version
+			os.MkdirAll("data/proxy/global/"+version, os.ModePerm)
+			err := os.Rename(data.TmpPathGlobalProxy, newLocation+"/leadns.tar.gz")
+			check(err)
+			serial_global_proxy = version
+		}
 	}
 	if data.DnsVersion != "0" && data.TmpPathGlobalDNS != "" {
-		newLocation := "data/dns/"+version
-		os.MkdirAll("data/dns/"+version, os.ModePerm)
-		err := os.Rename(data.TmpPathGlobalDNS, newLocation+"/dns.tar.gz")
-		check(err)
-		serial_global_dns = version
+		version = data.DnsVersion
+		if serial_global_dns != version {
+			newLocation := "data/dns/" + version
+			os.MkdirAll("data/dns/"+version, os.ModePerm)
+			err := os.Rename(data.TmpPathGlobalDNS, newLocation+"/dns.tar.gz")
+			check(err)
+			serial_global_dns = version
+		}
 	}
 	if data.WebVersion != "0" && data.TmpPathCNWeb != "" {
-		newLocation := "data/web/cn/"+version
-		os.MkdirAll("data/web/cn/"+version, os.ModePerm)
-		err := os.Rename(data.TmpPathCNWeb, newLocation+"/leadns.tar.gz")
-		check(err)
-		serial_cn_web = version
+		version = data.WebVersion
+		if serial_cn_web != version {
+			newLocation := "data/web/cn/" + version
+			os.MkdirAll("data/web/cn/"+version, os.ModePerm)
+			err := os.Rename(data.TmpPathCNWeb, newLocation+"/leadns.tar.gz")
+			check(err)
+			serial_cn_web = version
+		}
 	}
 	if data.ProxyVersion != "0" && data.TmpPathCNProxy != "" {
-		newLocation := "data/proxy/cn/"+version
-		os.MkdirAll("data/proxy/cn/"+version, os.ModePerm)
-		err := os.Rename(data.TmpPathCNProxy, newLocation+"/leadns.tar.gz")
-		check(err)
-		serial_cn_proxy = version
+		version = data.ProxyVersion
+		if serial_cn_proxy != version {
+			newLocation := "data/proxy/cn/" + version
+			os.MkdirAll("data/proxy/cn/"+version, os.ModePerm)
+			err := os.Rename(data.TmpPathCNProxy, newLocation+"/leadns.tar.gz")
+			check(err)
+			serial_cn_proxy = version
+		}
 	}
 	if data.TmpPathGlobalAll != "" {
+		version = data.Version
 		newLocation := "data/all/global/"+version
 		os.MkdirAll("data/all/global/"+version, os.ModePerm)
 		err := os.Rename(data.TmpPathGlobalAll, newLocation+"/compressfile.tar.gz")
