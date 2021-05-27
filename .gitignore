@@ -1,8 +1,9 @@
 .idea
 .env
 bin/centos/data/
-tmp/
 serialNumber
 LeaCenter
 tmp_backup/
-data
+
+# exclude
+!.gitignore
